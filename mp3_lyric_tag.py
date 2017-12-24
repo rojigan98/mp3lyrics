@@ -16,4 +16,14 @@ os.chdir("test_music")
 
 audiofile = eyed3.load("ultralight_beam.mp3")
 
+## this is what sets lyrics for the file 
+audiofile.tag.lyrics.set(u"Dragon Ball Super Opening 2")
+audiofile.tag.save()
+
+
+
+
+
+
+
 ## use audiofile.save() to save changes 
