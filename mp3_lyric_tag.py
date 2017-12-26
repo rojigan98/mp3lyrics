@@ -15,14 +15,8 @@ MAX_RETRIES = 20
 
 ## use google search/genius search API with search example: chance the rapper lyrics favorite song azlyrics, take out all brackets since prod datpiff and feat will mess with azlyrics
 
-def get_lyrics_link(my_song_name, my_artist):
-    my_artist = "".join(my_artist.lower().split())
-   
-     
-    my_song_name = my_song_name.lower()
-    words_in_song_name = my_song_name.split()
-    #check just song name first
-    #use Google api 
+def get_song_lyrics(song_name, song_artist):
+    return 0
 
 
 
@@ -36,8 +30,7 @@ if __name__ == "__main__":
 
     audiofile = eyed3.load("favorite_song.mp3")
 
-    audiofile.tag.lyrics.set(u"Dragon Ball Super Opening 2 hit dragon ball hit vegeta vs jiren super saiyan god super saiyan")
-    audiofile.tag.save()
+  
 
     song_title  = audiofile.tag.title
     artist = audiofile.tag.artist
@@ -63,7 +56,16 @@ if __name__ == "__main__":
         ## html = list(soup.children)[2]
 
         mydivs = soup.find_all("div", { "class" : "lyrics" })
-        print(mydivs[0].get_text())
+        lyrics = mydivs[0].get_text().lstrip()
+        ## lyrics_u = unicode(lyrics, "utf-8")
+
+
+        
+        
+        audiofile.tag.lyrics.set(lyrics)
+        audiofile.tag.save()
+        ## need to generalize this now, how do i find the lyrics on google?
+        
     
 
 
