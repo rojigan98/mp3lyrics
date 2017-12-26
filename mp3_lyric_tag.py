@@ -9,36 +9,14 @@ import eyed3
 import os 
 import requests
 from bs4 import BeautifulSoup
+import urllib.parse
 
 MAX_RETRIES = 20
 
 
 ## use google search/genius search API with search example: chance the rapper lyrics favorite song azlyrics, take out all brackets since prod datpiff and feat will mess with azlyrics
 
-def get_song_lyrics(song_name, song_artist):
-    return 0
-
-
-
-
-
-
-
-if __name__ == "__main__":
-    
-    os.chdir("test_music")
-
-    audiofile = eyed3.load("favorite_song.mp3")
-
-  
-
-    song_title  = audiofile.tag.title
-    artist = audiofile.tag.artist
-
-    #lyrics_link = get_lyrics_link(song_title, artist)
-    #work on getting one song working then generalize the case using the google search api and test for that
-    lyrics_link = "https://genius.com/Chance-the-rapper-favorite-song-lyrics"
-
+def get_song_lyrics(my_song_link):
     if(lyrics_link != False):
 
 
@@ -58,13 +36,48 @@ if __name__ == "__main__":
         mydivs = soup.find_all("div", { "class" : "lyrics" })
         lyrics = mydivs[0].get_text().lstrip()
         ## lyrics_u = unicode(lyrics, "utf-8")
+        return lyrics
+    else:
+        return False
+
+## after you can get the lyrics for any song then work on being able to iterate through all mp3's in the folder, and getting lyrics to each
+def get_song_lyrics_link(song_name, song_title):
+    
 
 
+
+
+
+
+if __name__ == "__main__":
+
+    ## TODO: Test if this path thing actually works, otherwise add your code in by splitting at the /, test if / even works in mac (and maybe windows)
+    music_folder = input("Which folder has all the songs you would like to add lyrics to? Alternatively, you can specify the path from this folder to the folder with those songs.  Note: All mp3 files in that folder will have lyrics added to it, if possible.\n")
+    
+    os.chdir(music_folder)
+    
+    audiofile = eyed3.load("good_ass_intro.mp3")
+
+  
+
+    song_title  = audiofile.tag.title
+    artist = audiofile.tag.artist
+
+    #lyrics_link = get_lyrics_link(song_title, artist)
+    #work on getting one song working then generalize the case using the google search api and test for that
+    lyrics_link = "https://genius.com/Chance-the-rapper-good-ass-intro-lyrics"
+
+
+    ## need to set up genius api
+    ## THIS IS JUST THE TOKEN
+    genius_token = "JjVbw2WmoW5jYxQGG7uPAqu4og62hfBUZz67QpVte4XFMuQf1qHBJ4VlEE9162FZ"
+   
+    lyrics = get_song_lyrics(lyrics_link)
         
         
-        audiofile.tag.lyrics.set(lyrics)
-        audiofile.tag.save()
-        ## need to generalize this now, how do i find the lyrics on google?
+    audiofile.tag.lyrics.set(lyrics)
+    audiofile.tag.save()
+    ## need to generalize this now, how do i find the lyrics on google?
         
     
 
