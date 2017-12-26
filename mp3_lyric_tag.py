@@ -4,13 +4,15 @@
 ## make the final program an executable and not a python script (but you can inc##  that too, can try using pyinstaller)
 ## make it so that user decides what name of folder to receive lyrics for 
 
+## look up how to get these libraries, if needed
 import eyed3
 import os 
 import requests
+from bs4 import BeautifulSoup
 
 
 ## Strategy to avoid imperfect metadata, do an azlyrics for the full artist and
-## song name, if that doesn't work shorten song name as much as possible one set of words at a time, if you get empty string, then go back to og string and shorten the artist name (usually isn't messed though)
+## song name, if that doesn't work shorten song name as much as possible one set of words at a time
 ## if this takes too long, assume song title name is fine, but shouldn't take mroe than two days
 
 def get_lyrics_link(my_song_name, my_artist):
@@ -46,8 +48,10 @@ artist = audiofile.tag.artist
 lyrics_link = get_lyrics_link(song_title, artist)
 
 if(lyrics_link != false):
-    
-
+    html_content = page.content
+    soup = BeautifulSoup(page.content, 'html.parser')
+    html = list(soup.children)[2]
+    print(html)
 
 
 ## TODO: Need to configure web scraper
