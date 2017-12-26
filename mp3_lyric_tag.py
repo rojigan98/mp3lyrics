@@ -10,51 +10,63 @@ import os
 import requests
 from bs4 import BeautifulSoup
 
+MAX_RETRIES = 20
 
-## Strategy to avoid imperfect metadata, do an azlyrics for the full artist and
-## song name, if that doesn't work shorten song name as much as possible one set of words at a time
-## if this takes too long, assume song title name is fine, but shouldn't take mroe than two days
+
+## use google search/genius search API with search example: chance the rapper lyrics favorite song azlyrics, take out all brackets since prod datpiff and feat will mess with azlyrics
 
 def get_lyrics_link(my_song_name, my_artist):
     my_artist = "".join(my_artist.lower().split())
-    website_link = "https://www.azlyrics.com/lyrics/" + my_artist + "/"
+   
      
     my_song_name = my_song_name.lower()
     words_in_song_name = my_song_name.split()
     #check just song name first
-    for words_kept in range(len(words_in_song_name), 0, -1):
-        word_to_check = "".join(words_in_song_name[0:words_kept])
-        my_link = website_link + word_to_check + ".html"
-        page = requests.get(my_link)
-        ## do I have to have an else clause?
-        if (str(page.status_code)[0] ==  2):
-            return my_link
+    #use Google api 
 
 
-    return false 
-            
 
 
-os.chdir("test_music")
-
-audiofile = eyed3.load("favorite_song.mp3")
-
-audiofile.tag.lyrics.set(u"Dragon Ball Super Opening 2 hit dragon ball hit vegeta vs jiren super saiyan god super saiyan")
-audiofile.tag.save()
-
-song_title  = audiofile.tag.title
-artist = audiofile.tag.artist
-
-lyrics_link = get_lyrics_link(song_title, artist)
-
-if(lyrics_link != false):
-    html_content = page.content
-    soup = BeautifulSoup(page.content, 'html.parser')
-    html = list(soup.children)[2]
-    print(html)
 
 
-## TODO: Need to configure web scraper
-## TODO: Need to search for song on google to get proper song name, if metadata is faulty
+
+if __name__ == "__main__":
+    
+    os.chdir("test_music")
+
+    audiofile = eyed3.load("favorite_song.mp3")
+
+    audiofile.tag.lyrics.set(u"Dragon Ball Super Opening 2 hit dragon ball hit vegeta vs jiren super saiyan god super saiyan")
+    audiofile.tag.save()
+
+    song_title  = audiofile.tag.title
+    artist = audiofile.tag.artist
+
+    #lyrics_link = get_lyrics_link(song_title, artist)
+    #work on getting one song working then generalize the case using the google search api and test for that
+    lyrics_link = "https://genius.com/Chance-the-rapper-favorite-song-lyrics"
+
+    if(lyrics_link != False):
+
+
+        '''
+        session = requests.Session()
+        adapter = requests.adapters.HTTPAdapter(max_retries=MAX_RETRIES)
+        session.mount('https://', adapter)
+        session.mount('https://', adapter)
+        r = session.get(lyrics_link)
+        '''
+    
+        page = requests.get(lyrics_link)
+        print(page.status_code)
+        soup = BeautifulSoup(page.content, 'html.parser')
+        ## html = list(soup.children)[2]
+
+        mydivs = soup.find_all("div", { "class" : "lyrics" })
+        print(mydivs[0].get_text())
+    
+
+
+    
 
 ## use audiofile.save() to save changes 
