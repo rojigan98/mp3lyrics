@@ -15,11 +15,20 @@ from rauth import OAuth2Service
 
 MAX_RETRIES = 20
 
+def truncate_title(song_title):
+
+    if len(song_title) >= 1:
+        for i in range(0, len(song_title)):
+            if song_title[i] == "(" or song_title[i] == ")":
+                return song_title[:i:]
+    return song_title
+
+
 def get_song_lyrics(my_song_link):
     if my_song_link != False:
         
         page = requests.get(my_song_link)
-        print(page.status_code)
+        print(page.status_code) #just for debugging and testing
         soup = BeautifulSoup(page.content, 'html.parser')
 
         mydivs = soup.find_all("div", { "class" : "lyrics" })
@@ -28,8 +37,14 @@ def get_song_lyrics(my_song_link):
     else:
         return False
 
-def get_song_lyrics_link(song_name, song_title):
-    return False
+def get_song_lyrics_link(song_artist, song_title, access_token, search_url):
+      
+    search_string = (truncate_title(song_title) + " " + song_artist).replace(" ", "%20").lower()
+    r = requests.get((search_url + search_string),
+                    headers = {'Authorization': ('Bearer ' + access_token)})
+    return (r.json()["response"]["hits"][0]["result"]["url"])
+
+    
 
 def get_authorize_code(authorize_code_url):
     for i in range(0, len(authorize_code_url)):
@@ -88,29 +103,24 @@ if __name__ == "__main__":
 
     token_info = requests.post("https://api.genius.com/oauth/token", data=my_data)
 
-    search_string = "Cocoa Butter Kisses".replace(" ", "%20").lower()
-    search_url = "https://api.genius.com/search?q="
-    
-
-    # print(token_info.text + "\n")
     python_token_info = token_info.json()
     access_token = python_token_info["access_token"]
-    r = requests.get((search_url + search_string),
-                    headers = {'Authorization': ('Bearer ' + access_token)})
-    print(r.json()["response"]["hits"][0])
+    search_url = "https://api.genius.com/search?q="
 
-    
-    '''
     music_folder = input("\n" + "Which folder has all the songs you would like to add lyrics to?" +
                          " Alternatively, you can specify the path from this folder to the folder with those songs." +
                          " Note: All mp3 files in that folder will have lyrics added to it, if possible." + '\n')
-    '''
-    '''
-    audiofile = eyed3.load("good_ass_intro.mp3")
+
+    os.chdir(music_folder)
+    
+    audiofile = eyed3.load("cocoa.mp3")
     song_title  = audiofile.tag.title
     artist = audiofile.tag.artist
-    # lyrics = get_song_lyrics(lyrics_link)
+    print(artist, song_title)
+    lyrics_link = get_song_lyrics_link(artist, song_title, access_token, search_url)
+    print(lyrics_link)
+    lyrics = get_song_lyrics(lyrics_link)
         
-    # audiofile.tag.lyrics.set(lyrics)
-    # audiofile.tag.save()
-    '''
+    audiofile.tag.lyrics.set(lyrics)
+    audiofile.tag.save()
+
