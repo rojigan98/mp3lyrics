@@ -15,10 +15,6 @@ from rauth import OAuth2Service
 
 MAX_RETRIES = 20
 
-def new_decoder(payload):
-    return json.loads(payload.decode('utf-8'))
-
-
 def get_song_lyrics(my_song_link):
     if my_song_link != False:
         
@@ -86,9 +82,22 @@ if __name__ == "__main__":
                            "url you are redirected to. Then press enter \n")
     authorize_code = get_authorize_code(authorize_code_url)
 
-    
+    my_data = {'code': authorize_code, 'client_secret': my_consumer_secret,
+               'grant_type': 'authorization_code', 'client_id': my_consumer_key,
+               'redirect_uri': redirect_uri, 'response_type': 'code'}
+
+    token_info = requests.post("https://api.genius.com/oauth/token", data=my_data)
+
+    search_string = "Cocoa Butter Kisses".replace(" ", "%20").lower()
+    search_url = "https://api.genius.com/search?q="
     
 
+    # print(token_info.text + "\n")
+    python_token_info = token_info.json()
+    access_token = python_token_info["access_token"]
+    r = requests.get((search_url + search_string),
+                    headers = {'Authorization': ('Bearer ' + access_token)})
+    print(r.json()["response"]["hits"][0])
 
     
     '''
