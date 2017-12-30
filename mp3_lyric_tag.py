@@ -111,16 +111,16 @@ if __name__ == "__main__":
                          " Alternatively, you can specify the path from this folder to the folder with those songs." +
                          " Note: All mp3 files in that folder will have lyrics added to it, if possible." + '\n')
 
-    os.chdir(music_folder)
-    
-    audiofile = eyed3.load("cocoa.mp3")
-    song_title  = audiofile.tag.title
-    artist = audiofile.tag.artist
-    print(artist, song_title)
-    lyrics_link = get_song_lyrics_link(artist, song_title, access_token, search_url)
-    print(lyrics_link)
-    lyrics = get_song_lyrics(lyrics_link)
-        
-    audiofile.tag.lyrics.set(lyrics)
-    audiofile.tag.save()
+
+    # also have this work for flacs too later, focus on mp3's for now
+    for filename in os.listdir(music_folder):
+        if filename.endswith(".mp3"):
+            audiofile = eyed3.load(os.path.join(music_folder, filename))
+            song_title  = audiofile.tag.title
+            artist = audiofile.tag.artist
+            lyrics_link = get_song_lyrics_link(artist, song_title, access_token, search_url)
+            print(lyrics_link)
+            lyrics = get_song_lyrics(lyrics_link)
+            audiofile.tag.lyrics.set(lyrics)
+            audiofile.tag.save()
 
