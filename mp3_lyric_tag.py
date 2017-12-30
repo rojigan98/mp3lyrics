@@ -6,12 +6,18 @@
 
 
 import eyed3
+import flask
 import os 
 import requests
+import json
 from bs4 import BeautifulSoup
 from rauth import OAuth2Service
 
 MAX_RETRIES = 20
+
+def new_decoder(payload):
+    return json.loads(payload.decode('utf-8'))
+
 
 def get_song_lyrics(my_song_link):
     if my_song_link != False:
@@ -26,18 +32,24 @@ def get_song_lyrics(my_song_link):
     else:
         return False
 
-# after you can get the lyrics for any song then work on iteration for songs in general
 def get_song_lyrics_link(song_name, song_title):
     return False
 
+def get_authorize_code(authorize_code_url):
+    for i in range(0, len(authorize_code_url)):
+        if authorize_code_url[i] == '?':
+            authorize_code_url = authorize_code_url[i+6::]
+            break
+        
+        #since after ? in redirect uri there is "code="
+    for i in range(0, len(authorize_code_url) - 1):
+        if authorize_code_url[i] == '&':
+            return authorize_code_url[:i:]
+    return authorize_code_url
 
 if __name__ == "__main__":
 
-    music_folder = input("Which folder has all the songs you would like to add lyrics to?" +
-                         "Alternatively, you can specify the path from this folder to the folder with those songs." +
-                         "Note: All mp3 files in that folder will have lyrics added to it, if possible." + '\n')
-    
-    os.chdir(music_folder)
+
 
     # need to set up genius api
 
@@ -45,7 +57,7 @@ if __name__ == "__main__":
 
     # save client secret in local file on this computer
 
-    my_consumer_key  = "jymJxl3NxzxFEQGZ5hvWWV7b5L0VNrojGSBVxfAGBmQCQ53F6oVIPhcxQ1Tk_2Ld"
+    my_consumer_key = "jymJxl3NxzxFEQGZ5hvWWV7b5L0VNrojGSBVxfAGBmQCQ53F6oVIPhcxQ1Tk_2Ld"
 
     # if doesn't work check this secret key
 
@@ -55,22 +67,36 @@ if __name__ == "__main__":
     my_access_token_url = 'https://api.genius.com/oauth/access_token'
     my_authorize_url = 'https://api.genius.com/oauth/authorize'
     my_base_url = 'https://api.genius.com/'
-    genius = OAuth2Service(
+    
+    genius =  OAuth2Service(
+        client_id=my_consumer_key,
+        client_secret=my_consumer_secret,
         name='genius',
-        client_id = my_consumer_key,
-        client_secret = my_consumer_secret,
-        access_token_url = my_access_token_url,
-        authorize_url = my_authorize_url,
-        base_url = my_base_url
-    )
+        authorize_url=my_authorize_url,
+        access_token_url=my_access_token_url,
+        base_url=my_base_url)
 
-    redirect_uri = 'http://example.com'
-    # if doesn't work check scope
-    params = {'scope': 'me', 'response_type': 'code',
-              'redirect_uri': redirect_uri
-              }
+    redirect_uri = 'https://example.com'
+    params = {'scope': 'me', 'response_type': 'code', 'state': 'ssg',
+              'redirect_uri': redirect_uri}
+
+    url = genius.get_authorize_url(**params)
+    authorize_code_url = input("\nPlease visit the following link \n" + url +
+                           "\nto authorize the session. Then paste the " +
+                           "url you are redirected to. Then press enter \n")
+    authorize_code = get_authorize_code(authorize_code_url)
+
+    
     
 
+
+    
+    '''
+    music_folder = input("\n" + "Which folder has all the songs you would like to add lyrics to?" +
+                         " Alternatively, you can specify the path from this folder to the folder with those songs." +
+                         " Note: All mp3 files in that folder will have lyrics added to it, if possible." + '\n')
+    '''
+    '''
     audiofile = eyed3.load("good_ass_intro.mp3")
     song_title  = audiofile.tag.title
     artist = audiofile.tag.artist
@@ -78,3 +104,4 @@ if __name__ == "__main__":
         
     # audiofile.tag.lyrics.set(lyrics)
     # audiofile.tag.save()
+    '''
