@@ -3,7 +3,7 @@
 # Start Date: December 23, 2017.
 # make the final program an executable and not a python script (but you can inc##  that too, can try using pyinstaller)
 # make it so that user decides what name of folder to receive lyrics for
-
+# need to make sure errors don't crash the code, how to handle errors 
 
 import eyed3
 import flask
@@ -15,12 +15,20 @@ from rauth import OAuth2Service
 
 MAX_RETRIES = 20
 
+##WORK ON THIS PART, pablo still doesn't work
 def truncate_title(song_title):
-
+    song_title = (song_title.lower()).replace(" ", "%20")
     if len(song_title) >= 1:
         for i in range(0, len(song_title)):
             if song_title[i] == "(" or song_title[i] == ")":
-                return song_title[:i:]
+                song_title = song_title[:i:]
+                break 
+    if len(song_title) >= 9:
+        for i in range(0, len(song_title)):
+            if song_title[i:i+8] == "explicit":
+                song_title = song_title[:i:]
+                break
+    print(song_title)
     return song_title
 
 
@@ -33,6 +41,7 @@ def get_song_lyrics(my_song_link):
 
         mydivs = soup.find_all("div", { "class" : "lyrics" })
         song_lyrics = mydivs[0].get_text().lstrip()
+        print(song_lyrics)
         return song_lyrics
     else:
         return False
@@ -40,6 +49,7 @@ def get_song_lyrics(my_song_link):
 def get_song_lyrics_link(song_artist, song_title, access_token, search_url):
       
     search_string = (truncate_title(song_title) + " " + song_artist).replace(" ", "%20").lower()
+    print("This is the search string", search_string)
     r = requests.get((search_url + search_string),
                     headers = {'Authorization': ('Bearer ' + access_token)})
     return (r.json()["response"]["hits"][0]["result"]["url"])
@@ -112,7 +122,7 @@ if __name__ == "__main__":
                          " Note: All mp3 files in that folder will have lyrics added to it, if possible." + '\n')
 
 
-    # also have this work for flacs too later, focus on mp3's for now
+    # THIS CODE DOESN"T WORK FOR LIFE OF PABLO LOOK INTO REASON WHY
     for filename in os.listdir(music_folder):
         if filename.endswith(".mp3"):
             audiofile = eyed3.load(os.path.join(music_folder, filename))
