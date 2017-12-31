@@ -4,7 +4,7 @@
 # make the final program an executable and not a python script (but you can inc##  that too, can try using pyinstaller)
 # make it so that user decides what name of folder to receive lyrics for
 # need to make sure errors don't crash the code, how to handle errors 
-
+# can do this by checking if "hits" is empty
 import eyed3
 import flask
 import os 
@@ -28,6 +28,11 @@ def truncate_title(song_title):
             if song_title[i:i+8] == "explicit":
                 song_title = song_title[:i:]
                 break
+    if len(song_title) >= 4:
+         for i in range(0, len(song_title)):
+            if song_title[i:i+5] == "feat.":
+                song_title = song_title[:i:]
+                break       
     print(song_title)
     return song_title
 
@@ -44,15 +49,32 @@ def get_song_lyrics(my_song_link):
         print(song_lyrics)
         return song_lyrics
     else:
-        return False
+        return ""
 
 def get_song_lyrics_link(song_artist, song_title, access_token, search_url):
-      
+    print(song_title)
+    first_word = song_title.split(" ")[0].lower()
+    title_length = len(song_title.split(" "))
+    print(title_length)
+    print("The first word of the title is", first_word)
+    if (title_length  > 1):
+        second_word = song_title.split(" ")[1].lower()
+        print("The second word of the title is", second_word)
     search_string = (truncate_title(song_title) + " " + song_artist).replace(" ", "%20").lower()
     print("This is the search string", search_string)
     r = requests.get((search_url + search_string),
                     headers = {'Authorization': ('Bearer ' + access_token)})
-    return (r.json()["response"]["hits"][0]["result"]["url"])
+    hits = r.json()["response"]["hits"]
+    for i in range(min(len(hits), 5)):
+        if first_word in hits[i]["result"]["url"].lower():
+            if title_length > 1:
+                if second_word in hits[i]["result"]["url"].lower():
+                    return hits[i]["result"]["url"]
+                    #check if first word in title is in here, then proceed, otherwise don't
+            else:   
+                return hits[i]["result"]["url"]
+                         
+    return False 
 
     
 
@@ -122,12 +144,12 @@ if __name__ == "__main__":
                          " Note: All mp3 files in that folder will have lyrics added to it, if possible." + '\n')
 
 
-    # THIS CODE DOESN"T WORK FOR LIFE OF PABLO LOOK INTO REASON WHY
     for filename in os.listdir(music_folder):
         if filename.endswith(".mp3"):
             audiofile = eyed3.load(os.path.join(music_folder, filename))
             song_title  = audiofile.tag.title
             artist = audiofile.tag.artist
+            print(artist)
             lyrics_link = get_song_lyrics_link(artist, song_title, access_token, search_url)
             print(lyrics_link)
             lyrics = get_song_lyrics(lyrics_link)
