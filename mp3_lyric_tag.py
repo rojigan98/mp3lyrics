@@ -1,10 +1,7 @@
 # Author: Rojigan Gengatharan
 # mp3_lyric_tag.py
 # Start Date: December 23, 2017.
-# make the final program an executable and not a python script (but you can inc##  that too, can try using pyinstaller)
-# make it so that user decides what name of folder to receive lyrics for
-# need to make sure errors don't crash the code, how to handle errors 
-# can do this by checking if "hits" is empty
+
 import eyed3
 import flask
 import os 
@@ -15,24 +12,29 @@ from rauth import OAuth2Service
 
 MAX_RETRIES = 20
 
-##WORK ON THIS PART, pablo still doesn't work
 def truncate_title(song_title):
-    song_title = (song_title.lower()).replace(" ", "%20")
+    # song_title = (song_title.lower()).replace(" ", "%20")
+    false_song_title = song_title.lower()
     if len(song_title) >= 1:
         for i in range(0, len(song_title)):
-            if song_title[i] == "(" or song_title[i] == ")":
+            if false_song_title[i] == "(" or false_song_title[i] == ")":
                 song_title = song_title[:i:]
                 break 
     if len(song_title) >= 9:
         for i in range(0, len(song_title)):
-            if song_title[i:i+8] == "explicit":
+            if false_song_title[i:i+8] == "explicit":
                 song_title = song_title[:i:]
                 break
     if len(song_title) >= 4:
          for i in range(0, len(song_title)):
-            if song_title[i:i+5] == "feat.":
+            if false_song_title[i:i+5] == "feat.":
                 song_title = song_title[:i:]
-                break       
+                break
+    if len(song_title) >= 3:
+         for i in range(0, len(song_title)):
+            if false_song_title[i:i+3] == "ft.":
+                song_title = song_title[:i:]
+                break  
     print(song_title)
     return song_title
 
@@ -53,6 +55,7 @@ def get_song_lyrics(my_song_link):
 
 def get_song_lyrics_link(song_artist, song_title, access_token, search_url):
     print(song_title)
+    song_title = truncate_title(song_title)
     first_word = song_title.split(" ")[0].lower()
     title_length = len(song_title.split(" "))
     print(title_length)
@@ -93,10 +96,6 @@ def get_authorize_code(authorize_code_url):
 if __name__ == "__main__":
 
 
-
-    # need to set up genius api
-
-    # USE GENIUS API READ THOSE GOOGLE TUTORIALS SO YOU UNDERSTAND HOW OAUTH2.0 ACTUALLY WORKS
 
     # save client secret in local file on this computer
 
